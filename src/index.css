@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
+
+* {
+    font-family: 'Sen', Sen;
+}
+
+@import "tailwindcss";
+
+@theme {
+    --color-primary-900: #3F9142;
+    --color-primary-800: #3F9142;
+    --color-primary-500: #1B281B;
+    --color-primary-200: #ffffff;
+    --color-primary-150 : #35793729;
+    --color-primary-100: #EEF6EF;
+    --color-primary-70: #1B281BB8;
+    --color-primary-50: #e5e7eb;
+}
+
+@layer base {
+    [data-theme="dark"] {
+        --color-primary-800: #98E19B;
+        --color-primary-500: #E2E2E2;
+        --color-primary-200: #232323;
+        --color-primary-100: #2C2C2C;
+        --color-primary-70: #E2E2E2;
+        --color-primary-50: #101010;
+    }
+}
+
+:root {
+    background-color: var(--color-primary-200);
+}
+
+#root{
+    height : 100vh ;
+    width : 100% ;
+    position: relative;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+.max-height {
+    height : calc(100vh-28px) ;
+}
