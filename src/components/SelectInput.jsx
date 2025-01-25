@@ -1,10 +1,11 @@
 import React from 'react'
 
-const SelectInput = ({ value = "", options = [], onSelect = () => { } }) => {
+const SelectInput = ({ value = "", options = [], onSelect = () => { }, name="" }) => {
     return (
         <select
             value={value}
-            onSelect={onSelect}
+            onChange={onSelect}
+            name={name}
             className='outline-none hover:cursor-pointer text-primary-500'
             required
         >

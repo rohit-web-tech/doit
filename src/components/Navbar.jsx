@@ -7,7 +7,7 @@ import { useGlobalContext } from '../context/GlobalContext';
 
 const Navbar = () => {
 
-    const {setTaskLayout,taskLayout} = useGlobalContext();
+    const {setTaskLayout,taskLayout,setShowSideBar} = useGlobalContext();
 
     return (
         <div
@@ -21,6 +21,7 @@ const Navbar = () => {
                 >
                     <IconWrapper
                         Icon={Menu}
+                        onClick={()=>setShowSideBar(prev=>!prev)}
                     />
                     <div
                         className='flex items-center'

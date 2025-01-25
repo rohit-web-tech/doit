@@ -1,36 +1,52 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import TaskInput from './TaskInput'
-import { Star } from 'lucide-react'
+import { Delete, Star, StarOffIcon } from 'lucide-react'
 import IconWrapper from './Icon'
 import { useGlobalContext } from '../context/GlobalContext'
 import CheckBox from './CheckBox'
+import { useDispatch, useSelector } from 'react-redux'
+import { deleteTodo, toggleImportant, toggleTodo } from '../store/todos/todosActions'
 
-export const Task = ({ className = "" }) => {
+export const Task = ({ className = "", todo, onCheck = () => { }, onClick = () => { }, isActive = false }) => {
 
-  const [isCompleted, setIsCompleted] = useState(false);
+  const dispatch = useDispatch();
 
   return (
     <div
-      className={`border-b-1 px-2 border-primary-150 py-2 flex justify-between cursor-pointer w-full ${className}`}
+      className={`border-b-1 px-2 border-primary-150 py-2 flex justify-between cursor-pointer w-full ${isActive ? "bg-primary-50" : ""} ${className}`}
+      onClick={onClick}
     >
       <CheckBox
-        label={"Task"}
-        checked={isCompleted}
-        onChange={(e) => setIsCompleted(e.target.checked)}
+        label={todo?.title}
+        checked={todo?.completed}
+        onChange={() => dispatch(toggleTodo(todo?.id))}
       />
-      <IconWrapper
-        className='w-5 h-5'
-        Icon={Star}
-      />
+      <div
+        className='flex items-center gap-1'
+      >
+        <IconWrapper
+          className='w-5 h-5'
+          Icon={Delete}
+          onClick={() => dispatch(deleteTodo(todo?.id))}
+        />
+        <IconWrapper
+          className='w-5 h-5'
+          Icon={todo?.important ? Star : StarOffIcon}
+          onClick={() => dispatch(toggleImportant(todo?.id))}
+        />
+      </div>
     </div>
   )
 }
 
-export const TaskCard = () => (
+export const TaskCard = ({ todo, onClick = () => { }, isActive = false }) => (
   <div
-    className='border-1 border-primary-150 inline-flex'
+    className={`border-1 border-primary-150 inline-flex ${isActive ? "bg-primary-50" : ""} `}
+    onClick={onClick}
   >
     <Task
+      todo={todo}
+      onClick={onClick}
       className="my-8 border-none"
     />
   </div>
@@ -38,7 +54,37 @@ export const TaskCard = () => (
 
 const TasksList = () => {
 
-  const { taskLayout } = useGlobalContext();
+  const { taskLayout, currentPage, setOpenDetails, openDetails } = useGlobalContext();
+  const allTodos = useSelector(state => state.todos);
+  const [todos, setTodos] = useState([]);
+
+  // memorizing the grouping of completed and pending todos so that the grouping will again happen only if todos are updated 
+  // and not for any other state change
+  let { completed, pending } = useMemo(() => {
+    // using reduce method on todos array to group the todos as per their status (i.e. either pending or completed) 
+    return todos?.reduce((groupedTodos, todo) => {
+      if (todo?.completed) {
+        groupedTodos.completed.push(todo);
+      } else {
+        groupedTodos.pending.push(todo);
+      }
+      return groupedTodos;
+    }, { completed: [], pending: [] });
+  }, [todos]);
+
+  // according to the filters of side bar such as All, Today's and Important Tasks updating the todo state to show appropriate result
+  useEffect(() => {
+    if (currentPage === "Important Tasks") {
+      setTodos(allTodos?.filter(todo => todo?.important));
+    } else {
+      setTodos(allTodos);
+    }
+  }, [currentPage, allTodos]);
+
+
+  const handleOpenDetails = (id) => {
+    setOpenDetails({ id, status: true })
+  }
 
   return (
     <div
@@ -66,21 +112,31 @@ const TasksList = () => {
           <div
             className='mt-2'
           >
-            <Task />
-            <Task />
-            <Task />
-            <Task />
-            <Task />
+            {
+              pending?.map(todo => (
+                <Task
+                  todo={todo}
+                  key={todo?.id}
+                  onClick={() => handleOpenDetails(todo?.id)}
+                  isActive={todo?.id === openDetails?.id}
+                />
+              ))
+            }
           </div>
         ) : (
           <div
             className='grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 mt-3'
           >
-            <TaskCard />
-            <TaskCard />
-            <TaskCard />
-            <TaskCard />
-            <TaskCard />
+            {
+              pending?.map(todo => (
+                <TaskCard
+                  todo={todo}
+                  key={todo?.id}
+                  onClick={() => handleOpenDetails(todo?.id)}
+                  isActive={todo?.id === openDetails?.id}
+                />
+              ))
+            }
           </div>
         )
       }
@@ -94,14 +150,19 @@ const TasksList = () => {
       <div
         className='mt-2'
       >
-        <Task />
-        <Task />
-        <Task />
-        <Task />
-        <Task />
+        {
+          completed?.map(todo => (
+            <Task
+              todo={todo}
+              key={todo?.id}
+              onClick={() => handleOpenDetails(todo?.id)}
+              isActive={todo?.id === openDetails?.id}
+            />
+          ))
+        }
       </div>
     </div>
   )
 }
 
-export default TasksList
+export default TasksList;

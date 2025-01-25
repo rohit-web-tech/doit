@@ -1,63 +1,20 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import IconWrapper from './Icon';
-import { Calendar, Star } from 'lucide-react';
+import { Calendar, Star, StarOff} from 'lucide-react';
 import SelectInput from './SelectInput';
 import { useDispatch } from 'react-redux';
 import { addTodo } from '../store/todos/todosActions';
-
-const priorityOptions = [
-  {
-    value: "",
-    label: "Select Priority"
-  },
-  {
-    value: "high",
-    label: "🔥 High"
-  },
-  {
-    value: "medium",
-    label: "👀 Medium"
-  },
-  {
-    value: "low",
-    label: "🙂‍↔️ Low"
-  }
-]
-
-const behaviourOptions = [
-  {
-    value: "",
-    label: "Select Behaviour"
-  },
-  {
-    value: "general",
-    label: "😊 General"
-  },
-  {
-    value: "indoor",
-    label: "🏠 Indoor"
-  },
-  {
-    value: "outdoor",
-    label: "🛣️ Outdoor"
-  }
-]
+import {todoTypeOptions,priorityOptions} from "../const/index.js";
+import { useGlobalContext } from '../context/GlobalContext.jsx';
 
 const TaskInput = () => {
-  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef();
   const dispatch = useDispatch();
-  const [todo, setTodo] = useState({
-    title : "",
-    important : false,
-    date : "" ,
-    behaviour : "" ,
-    priority : ""
-  });
+  const [todo, setTodo] = useState(null);
+  const {isFocused,setIsFocused} = useGlobalContext();
 
-  // Add a new todo
   const handleAddTodo = () => {
-    if (!todo.title.trim() || !todo?.behaviour || !todo?.priority || !todo?.date){
+    if (!todo.title.trim() || !todo?.type || !todo?.priority) {
       return alert("Please fill all the fields");
     };
     dispatch(
@@ -67,14 +24,18 @@ const TaskInput = () => {
         completed: false
       })
     );
-    setTodo({
-      title : "",
-      important : false,
-      date : "" ,
-      behaviour : "" ,
-      priority : ""
-    });
+    setTodo(null);
   };
+
+  const handleInputChange = (e) => {
+    setTodo({...todo,[e.target.name]:e.target.value});
+  }
+
+  useEffect(()=>{
+    if(isFocused){
+      inputRef?.current?.focus();
+    }
+  },[isFocused])
 
   return (
     <div
@@ -82,13 +43,14 @@ const TaskInput = () => {
     >
       <div
         className='h-full w-full cursor-text flex items-center'
-        onClick={() => inputRef.current.focus()}
+        onClick={()=>setIsFocused(true)}
       >
         <input
           type="text"
           value={todo?.title}
           placeholder='Add A Task'
           ref={inputRef}
+          name="title"
           className='text-[15px] placeholder:text-primary-70 font-medium w-full outline-none text-primary-500'
           onFocus={() => {
             setIsFocused(true)
@@ -96,8 +58,9 @@ const TaskInput = () => {
           onBlur={() => {
             setIsFocused(false)
           }}
-          onChange={(e) => {
-            setTodo({ ...todo, title: e.target.value })
+          onChange={handleInputChange}
+          onKeyDown={(e)=> {
+            e.key === "Enter" && handleAddTodo()
           }}
           required
         />
@@ -110,20 +73,22 @@ const TaskInput = () => {
         >
           <IconWrapper
             onClick={() => setTodo({ ...todo, important: !todo?.important })}
-            Icon={Star}
+            Icon={todo?.important ? Star : StarOff}
           />
           <IconWrapper
             Icon={Calendar}
           />
           <SelectInput
-            value=""
-            onSelect={() => { }}
+            value={todo?.priority}
+            onSelect={handleInputChange}
             options={priorityOptions}
+            name="priority"
           />
           <SelectInput
-            value=""
-            onSelect={() => { }}
-            options={behaviourOptions}
+            value={todo?.type}
+            onSelect={handleInputChange}
+            options={todoTypeOptions}
+            name="type"
           />
         </div>
         <button

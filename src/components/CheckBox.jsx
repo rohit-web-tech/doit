@@ -1,12 +1,13 @@
 import React, { useId } from 'react'
 
-const CheckBox = ({className="gap-4",label="",onChange=()=>{},checked}) => {
+const CheckBox = ({ className = "gap-4", label = "", onChange = () => { }, checked }) => {
 
     const id = useId();
 
     return (
         <div
             className={`flex items-center ${className}`}
+            onClick={(e)=>e.stopPropagation()}
         >
             <input
                 id={id}
@@ -16,7 +17,7 @@ const CheckBox = ({className="gap-4",label="",onChange=()=>{},checked}) => {
                 className='cursor-pointer h-[18px] w-[18px] border-2 border-gray-300 rounded-sm accent-primary-900 text-white'
             />
             <label
-                className='text-primary-500 text-[15px] font-medium hover:cursor-pointer'
+                className={`text-primary-500 text-[15px] font-medium hover:cursor-pointer ${checked ? "underline" : ""}`}
                 htmlFor={id}
             >
                 {label}

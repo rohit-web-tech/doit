@@ -38,8 +38,9 @@ const NavTab = ({ Icon, label = "Home" }) => {
 const SideBar = () => {
 
     const [showLogout, setShowLogout] = useState(false);
+    const {setIsFocused,showSideBar} = useGlobalContext();
 
-    return (
+    return showSideBar ? (
         <div
             className='sidebar w-[280px] h-[calc(100vh-50px)] relative bg-primary-200 overflow-y-auto'
         >
@@ -88,6 +89,7 @@ const SideBar = () => {
                 </CardWrapper>
                 <CardWrapper>
                     <div
+                        onClick={()=>setIsFocused(true)}
                         className="flex items-center gap-2.5 py-2 px-4 rounded-lg hover:bg-primary-50 hover:cursor-pointer"
                     >
                         <Plus
@@ -121,7 +123,7 @@ const SideBar = () => {
                 </CardWrapper>
             </div>
         </div>
-    )
+    ) : null ;
 }
 
 export default SideBar
